@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "freecloak"
+description = "Integrating FreeIPA and Keycloak"
+dynamic = ["version"]
+dependencies = [
+  "requests",
+]
+requires-python = ">= 3.11"
+authors = [
+  {name = "Gabriele Ron", email = "developer@groncyber.com"},
+]
+maintainers = [
+  {name = "Gabriele Ron", email = "developer@groncyber.com"},
+]
+readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+keywords = ["freeipa", "keycloak", "sso", "ldap"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Systems Administration",
+    "Typing :: Typed"
+]
+
+[project.scripts]
+freecloak = "freecloak.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Macr0Nerd/"
+Documentation = "https://github.com/Macr0Nerd/"
+Repository = "https://github.com/Macr0Nerd/freecloak.git"
+Issues = "https://github.com/Macr0Nerd/freecloak/issues"
+Changelog = "https://github.com/Macr0Nerd/freecloak/blob/master/CHANGELOG.md"
