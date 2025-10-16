@@ -19,6 +19,7 @@
 import argparse
 import importlib
 import logging
+from types import ModuleType
 
 from freecloak import __version__
 from freecloak.plugins.abstract import PluginInfo
@@ -65,11 +66,11 @@ def main() -> int:
     logging_args, cli_args = root_parser.parse_known_args()
     configure_logging(**vars(logging_args))
 
-    plugins = discover_plugins()
+    discovered_plugins = discover_plugins()
 
     global_arg_funcs = [add_logging_arguments, add_miscellaneous_arguments]
     subparsers = root_parser.add_subparsers(help='plugin help', dest='plugin', metavar='PLUGIN', required=True)
-    for plugin_name, plugin_module in plugins.items():
+    for plugin_name, plugin_module in discovered_plugins.copy().items():
         plugin_info: PluginInfo = plugin_module.__plugin_info__
 
         try:
@@ -80,6 +81,8 @@ def main() -> int:
             plugin_subparsers = plugin_parser.add_subparsers(help='command help', dest='command', metavar='COMMAND', required=True)
 
             plugin_parser_func(plugin_subparsers, global_arg_funcs=global_arg_funcs)
+
+            discovered_plugins[plugin_info.plugin_name] = plugin_module
         except AttributeError:
             logger.warning(t'Plugin {plugin_info.plugin_name} does not properly implement the plugin specification; skipping')
             continue
@@ -95,7 +98,7 @@ def main() -> int:
     args = vars(root_parser.parse_args())
 
     try:
-        plugin_commands_module = importlib.import_module(f"freecloak.plugins.{args['plugin']}.commands")
+        plugin_commands_module = importlib.import_module(f"{discovered_plugins[args['plugin']].__name__}.commands")
         return getattr(plugin_commands_module, args['command'])(**args)
     except AttributeError:
         logger.error(t'Plugin "{args["plugin"]}" has no command "{args["command"]}"')
