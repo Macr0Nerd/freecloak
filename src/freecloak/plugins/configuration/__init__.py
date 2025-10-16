@@ -16,33 +16,11 @@
 ##############################################################################
 
 
-import importlib
-import logging
-import pkgutil
-from types import ModuleType
-
-import freecloak.plugins
+from freecloak.plugins.abstract import PluginInfo
 
 
-logger = logging.getLogger(__name__)
+__plugin_info__ = PluginInfo(
+    plugin_name='configuration',
+)
 
-
-def discover_plugins() -> dict[str, ModuleType]:
-    iter_namespace = lambda ns_pkg: pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + ".")
-
-    discovered_plugins = {
-        name: importlib.import_module(name)
-        for finder, name, ispkg
-        in iter_namespace(freecloak.plugins)
-    }
-
-    valid_plugins = {}
-
-    for plugin_name, plugin_module in discovered_plugins.items():
-        if not hasattr(plugin_module, '__plugin_info__'):
-            logger.warning(f'Plugin {plugin_name} has no __plugin_info__ attribute, skipping')
-            continue
-
-        valid_plugins[plugin_name] = plugin_module
-
-    return valid_plugins
+__all__ = []

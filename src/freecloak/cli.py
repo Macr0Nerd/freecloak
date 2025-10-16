@@ -21,12 +21,12 @@ import importlib
 import logging
 
 from freecloak import __version__
-from freecloak.abstract import PluginInfo
-from freecloak.app import discover_plugins
-from freecloak.logging import configure_logging
+from freecloak.plugins.abstract import PluginInfo
+from freecloak.plugins.logging import configure_logging, TemplateStringAdapter
+from freecloak.plugins.utils import discover_plugins
 
 
-logger = logging.getLogger(__name__)
+logger = TemplateStringAdapter(logging.getLogger(__name__))
 
 
 def add_connection_arguments(parser: argparse.ArgumentParser) -> None:
@@ -72,11 +72,20 @@ def main() -> int:
     for plugin_name, plugin_module in plugins.items():
         plugin_info: PluginInfo = plugin_module.__plugin_info__
 
-        plugin_parser = subparsers.add_parser(plugin_info.plugin_name, help=f'{plugin_info.plugin_name} help', add_help=False)
-        plugin_subparsers = plugin_parser.add_subparsers(help='command help', dest='command', metavar='COMMAND', required=True)
+        try:
+            plugin_cli_module = importlib.import_module(f'{plugin_name}.cli')
+            plugin_parser_func = plugin_cli_module.add_plugin_parser
 
-        plugin_app_module = importlib.import_module(f'{plugin_name}.app')
-        plugin_app_module.add_plugin_parser(plugin_subparsers, global_arg_funcs=global_arg_funcs)
+            plugin_parser = subparsers.add_parser(plugin_info.plugin_name, help=f'{plugin_info.plugin_name} help', add_help=False)
+            plugin_subparsers = plugin_parser.add_subparsers(help='command help', dest='command', metavar='COMMAND', required=True)
+
+            plugin_parser_func(plugin_subparsers, global_arg_funcs=global_arg_funcs)
+        except AttributeError:
+            logger.warning(t'Plugin {plugin_info.plugin_name} does not properly implement the plugin specification; skipping')
+            continue
+        except ImportError:
+            logger.debug(t'Plugin {plugin_info.plugin_name} is a backend plugin; skipping')
+            continue
 
         for global_arg_func in global_arg_funcs:
             global_arg_func(plugin_parser)
@@ -86,7 +95,11 @@ def main() -> int:
     args = vars(root_parser.parse_args())
 
     try:
-        return getattr(plugins[f"freecloak.plugins.{args['plugin']}"], args['command'])(**args)
+        plugin_commands_module = importlib.import_module(f"freecloak.plugins.{args['plugin']}.commands")
+        return getattr(plugin_commands_module, args['command'])(**args)
     except AttributeError:
-        logger.error(f'Plugin "{args["plugin"]}" has no method "{args["command"]}"')
+        logger.error(t'Plugin "{args["plugin"]}" has no command "{args["command"]}"')
         return 2
+    except ImportError:
+        logger.error(t'Plugin "{args["plugin"]}" does not properly implement the plugin specification; exiting')
+        return 1

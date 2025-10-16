@@ -9,7 +9,7 @@ dynamic = ["version"]
 dependencies = [
   "requests",
 ]
-requires-python = ">= 3.11"
+requires-python = ">= 3.14"
 authors = [
   {name = "Gabriele Ron", email = "developer@groncyber.com"},
 ]
@@ -25,10 +25,7 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: Information Technology",
     "Intended Audience :: System Administrators",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: System :: Systems Administration",
     "Typing :: Typed"
 ]

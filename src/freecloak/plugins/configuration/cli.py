@@ -16,6 +16,24 @@
 ##############################################################################
 
 
-from freecloak.logging.utils import configure_logging
+import argparse
+from typing import Callable, Iterable, Optional
+import logging
 
-__all__ = ['configure_logging']
+from freecloak.plugins.logging import TemplateStringAdapter
+
+
+logger = TemplateStringAdapter(logging.getLogger(__name__))
+
+
+def add_plugin_parser(
+    subparsers: argparse._SubParsersAction,
+    *,
+    global_arg_funcs: Optional[Iterable[Callable]] = None
+) -> None:
+    if not global_arg_funcs:
+        global_arg_funcs = []
+
+    test_parser = subparsers.add_parser('test', add_help=False)
+    for global_arg_func in global_arg_funcs:
+        global_arg_func(test_parser)

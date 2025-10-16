@@ -20,7 +20,7 @@ import logging
 import logging.config
 from typing import Optional
 
-from freecloak.logging.filters import filters
+from freecloak.plugins.logging.filters import filters
 
 
 def configure_logging(
