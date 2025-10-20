@@ -22,10 +22,13 @@ from typing import Mapping, Optional
 
 
 class TemplateStringAdapterWrapper:
-    def __init__(self, template: string.templatelib.Template):
+    def __init__(self, template: string.templatelib.Template | str):
         self.template = template
 
     def __str__(self) -> str:
+        if isinstance(self.template, str):
+            return self.template
+
         return ''.join(map(lambda x: x.value if isinstance(x, string.templatelib.Interpolation) else x, iter(self.template)))
 
 
