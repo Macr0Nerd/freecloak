@@ -72,7 +72,15 @@ def main() -> int:
             plugin_cli_module = importlib.import_module(f'{plugin_name}.cli')
             plugin_parser_func = plugin_cli_module.add_plugin_parser
 
-            plugin_parser = subparsers.add_parser(plugin_info.plugin_name, help=f'{plugin_info.plugin_name} help')
+            plugin_parser_kwargs = {}
+            if plugin_info.plugin_description:
+                plugin_parser_kwargs['description'] = plugin_info.plugin_description
+
+            plugin_parser = subparsers.add_parser(
+                plugin_info.plugin_name,
+                help=f'{plugin_info.plugin_name} help',
+                **plugin_parser_kwargs
+            )
             plugin_subparsers = plugin_parser.add_subparsers(help='command help', dest='command', metavar='COMMAND', required=True)
 
             plugin_parser_func(plugin_subparsers)
