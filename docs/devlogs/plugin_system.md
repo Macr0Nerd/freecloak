@@ -19,6 +19,8 @@ If you want a plugin to be usable from the cli, you must implement an
 `<plugin>.cli` with the `add_plugin_parser` method that will be the
 entrypoint for adding argparse arguments. This method will be passed a
 `argparse._SubParsersAction` so that it can add the cli commands and
-configuration options. The commands added must be accessible from the module
-path `<plugin>.commands` or they will not be found. These commands should
-accept kwargs, although they do not need to be used (e.g. `**_`).
+configuration options. When creating your argument parsers, keep in mind that
+the global logging argument groups will be added to all subparsers (both plugin
+and command). Additionally, the commands added must be accessible from the
+module path `<plugin>.commands` or they will not be found. These commands
+should accept kwargs, although they do not need to be used (e.g. `**_`).

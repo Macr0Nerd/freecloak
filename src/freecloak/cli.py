@@ -19,7 +19,6 @@
 import argparse
 import importlib
 import logging
-from types import ModuleType
 
 from freecloak import __version__
 from freecloak.plugins.abstract import PluginInfo
@@ -29,9 +28,6 @@ from freecloak.plugins.utils import discover_plugins
 
 logger = TemplateStringAdapter(logging.getLogger(__name__))
 
-
-def add_connection_arguments(parser: argparse.ArgumentParser) -> None:
-    keycloak_group = parser.add_argument_group('keycloak')
 
 def add_miscellaneous_arguments(parser: argparse.ArgumentParser) -> None:
     miscellaneous_group = parser.add_argument_group('miscellaneous')
@@ -68,7 +64,6 @@ def main() -> int:
 
     discovered_plugins = discover_plugins()
 
-    global_arg_funcs = [add_logging_arguments, add_miscellaneous_arguments]
     subparsers = root_parser.add_subparsers(help='plugin help', dest='plugin', metavar='PLUGIN', required=True)
     for plugin_name, plugin_module in discovered_plugins.copy().items():
         plugin_info: PluginInfo = plugin_module.__plugin_info__
@@ -77,10 +72,14 @@ def main() -> int:
             plugin_cli_module = importlib.import_module(f'{plugin_name}.cli')
             plugin_parser_func = plugin_cli_module.add_plugin_parser
 
-            plugin_parser = subparsers.add_parser(plugin_info.plugin_name, help=f'{plugin_info.plugin_name} help', add_help=False)
+            plugin_parser = subparsers.add_parser(plugin_info.plugin_name, help=f'{plugin_info.plugin_name} help')
             plugin_subparsers = plugin_parser.add_subparsers(help='command help', dest='command', metavar='COMMAND', required=True)
 
-            plugin_parser_func(plugin_subparsers, global_arg_funcs=global_arg_funcs)
+            plugin_parser_func(plugin_subparsers)
+
+            if plugin_subparsers.choices:
+                for _, choice in plugin_subparsers.choices.items():
+                    add_logging_arguments(choice)
 
             discovered_plugins[plugin_info.plugin_name] = plugin_module
         except AttributeError:
@@ -90,8 +89,7 @@ def main() -> int:
             logger.debug(t'Plugin {plugin_info.plugin_name} is a backend plugin; skipping')
             continue
 
-        for global_arg_func in global_arg_funcs:
-            global_arg_func(plugin_parser)
+        add_logging_arguments(plugin_parser)
 
     add_miscellaneous_arguments(root_parser)
 
