@@ -26,10 +26,10 @@ class TemplateStringAdapterWrapper:
         self.template = template
 
     def __str__(self) -> str:
-        if isinstance(self.template, str):
-            return self.template
+        if isinstance(self.template, string.templatelib.Template):
+            return ''.join(map(lambda x: x.value if isinstance(x, string.templatelib.Interpolation) else x, iter(self.template)))
 
-        return ''.join(map(lambda x: x.value if isinstance(x, string.templatelib.Interpolation) else x, iter(self.template)))
+        return self.template.__str__()
 
 
 class TemplateStringAdapter(logging.LoggerAdapter):
