@@ -16,11 +16,14 @@
 ##############################################################################
 
 
+from freecloak import __version__
 from freecloak.plugins.abstract import PluginInfo
 
 
 __plugin_info__ = PluginInfo(
     plugin_name='configuration',
+    plugin_description='keycloak configuration plugin',
+    plugin_version=__version__
 )
 
 __all__ = []

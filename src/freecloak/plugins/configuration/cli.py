@@ -17,7 +17,6 @@
 
 
 import argparse
-from typing import Callable, Iterable, Optional
 import logging
 
 from freecloak.plugins.logging import TemplateStringAdapter
@@ -26,14 +25,19 @@ from freecloak.plugins.logging import TemplateStringAdapter
 logger = TemplateStringAdapter(logging.getLogger(__name__))
 
 
-def add_plugin_parser(
-    subparsers: argparse._SubParsersAction,
-    *,
-    global_arg_funcs: Optional[Iterable[Callable]] = None
-) -> None:
-    if not global_arg_funcs:
-        global_arg_funcs = []
+def add_connection_arguments(parser: argparse.ArgumentParser) -> None:
+    keycloak_connection_group = parser.add_argument_group('keycloak connection')
+    keycloak_connection_group.add_argument('-d', '--domain', help='keycloak domain', required=True)
+    keycloak_connection_group.add_argument('-p', '--port', help='keycloak port', type=int)
+    keycloak_connection_group.add_argument('-r', '--realm', help='keycloak realm', required=True)
 
-    test_parser = subparsers.add_parser('test', add_help=False)
-    for global_arg_func in global_arg_funcs:
-        global_arg_func(test_parser)
+    keycloak_connection_group.add_argument('-cid', '--client-id', help='keycloak client id', required=True)
+    keycloak_connection_group.add_argument('-csf', '--client-secret-file', help='keycloak client secret file path', required=True)
+
+    keycloak_connection_group.add_argument('--insecure', help='use HTTP to connect', action="store_true")
+
+    pass
+
+def add_plugin_parser(subparsers: argparse._SubParsersAction) -> None:
+    dev_parser = subparsers.add_parser('dev')
+    add_connection_arguments(dev_parser)
