@@ -18,7 +18,7 @@
 
 import datetime
 import logging
-from typing import Optional
+from typing import Self
 
 import requests
 import requests.auth
@@ -29,33 +29,39 @@ from freecloak.plugins.logging import TemplateStringAdapter
 logger = TemplateStringAdapter(logging.getLogger(__name__))
 
 
+class KeycloakAuthToken:
+    __slots__ = ['token', 'token_expires', 'token_type']
+
+    def __init__(self, token: str = None, token_expires: datetime.datetime = None, token_type: str = None) -> None:
+        self.token: str = token
+        self.token_expires: datetime.datetime = token_expires
+        self.token_type: str = token_type
+
+    def __get__(self, obj: KeycloakAuth, obj_type=None) -> Self:
+        if not self.token_expires or self.token_expires < datetime.datetime.now():
+            authentication_data = requests.post(
+                obj.token_endpoint,
+                data={
+                    'client_id': obj.client_id,
+                    'client_secret': obj.client_secret,
+                    'grant_type': 'client_credentials',
+                }
+            ).json()
+
+            self.token = authentication_data['access_token']
+            self.token_type = authentication_data['token_type']
+            self.token_expires = datetime.datetime.now() + datetime.timedelta(seconds=authentication_data['expires_in'])
+
+        return self
+
 class KeycloakAuth(requests.auth.AuthBase):
+    token = KeycloakAuthToken()
+
     def __init__(self, client_id: str, client_secret: str, token_endpoint: str) -> None:
         self.client_id: str = client_id
         self.client_secret: str = client_secret
         self.token_endpoint: str = token_endpoint
 
-        self.token: Optional[str] = None
-        self.token_expires: Optional[datetime.datetime] = None
-        self.token_type = None
-
     def __call__(self, r):
-        if not self.token_expires or self.token_expires < datetime.datetime.now():
-            self.refresh_token()
-
-        r.headers['Authorization'] = f'{self.token_type} {self.token}'
+        r.headers['Authorization'] = f'{self.token.token_type} {self.token.token}'
         return r
-
-    def refresh_token(self) -> None:
-        authentication_data = requests.post(
-            self.token_endpoint,
-            data={
-                'client_id': self.client_id,
-                'client_secret': self.client_secret,
-                'grant_type': 'client_credentials',
-            }
-        ).json()
-
-        self.token = authentication_data['access_token']
-        self.token_type = authentication_data['token_type']
-        self.token_expires = datetime.datetime.now() + datetime.timedelta(seconds=authentication_data['expires_in'])
