@@ -39,6 +39,8 @@ class KeycloakAuthToken:
 
     def __get__(self, obj: KeycloakAuth, obj_type=None) -> Self:
         if not self.token_expires or self.token_expires < datetime.datetime.now():
+            logger.debug('Keycloak auth token expired; fetching new token')
+
             authentication_data = requests.post(
                 obj.token_endpoint,
                 data={

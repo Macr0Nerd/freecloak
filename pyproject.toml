@@ -39,3 +39,6 @@ Documentation = "https://github.com/Macr0Nerd/"
 Repository = "https://github.com/Macr0Nerd/freecloak.git"
 Issues = "https://github.com/Macr0Nerd/freecloak/issues"
 Changelog = "https://github.com/Macr0Nerd/freecloak/blob/master/CHANGELOG.md"
+
+[tool.setuptools.package-data]
+"freecloak.plugins.keycloak.data" = ["*.json"]

@@ -1,0 +1,6 @@
+{
+  "get_realms": {
+    "path": "/admin/realms",
+    "method": "get"
+  }
+}
