@@ -19,6 +19,8 @@
 from freecloak import __version__
 from freecloak.plugins.abstract import PluginInfo
 
+from freecloak.plugins.keycloak.client import KeycloakClient, KeycloakSession
+
 
 __plugin_info__ = PluginInfo(
     plugin_name='keycloak',
@@ -26,4 +28,7 @@ __plugin_info__ = PluginInfo(
     plugin_version=__version__,
 )
 
-__all__ = []
+__all__ = [
+    'KeycloakClient',
+    'KeycloakSession',
+]
