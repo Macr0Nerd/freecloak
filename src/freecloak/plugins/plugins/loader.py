@@ -16,17 +16,34 @@
 ##############################################################################
 
 
-from freecloak import __version__
-from freecloak.plugins.abstract.plugin_info import PluginInfo
+import importlib
+import logging
+import pkgutil
+from types import ModuleType
 
-from freecloak.plugins.exceptions.exit_exception import FreecloakExitError
+import freecloak.plugins
+from freecloak.plugins.logging import TemplateStringAdapter
 
 
-__all__ = [
-    'FreecloakExitError'
-]
+logger = TemplateStringAdapter(logging.getLogger(__name__))
 
-__plugin_info__ = PluginInfo(
-    plugin_name="exceptions",
-    plugin_version=__version__,
-)
+
+def discover_plugins() -> dict[str, ModuleType]:
+    iter_namespace = lambda ns_pkg: pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + ".")
+
+    discovered_plugins = {
+        name: importlib.import_module(name)
+        for finder, name, ispkg
+        in iter_namespace(freecloak.plugins)
+    }
+
+    valid_plugins = {}
+
+    for plugin_name, plugin_module in discovered_plugins.items():
+        if not hasattr(plugin_module, '__plugin_info__'):
+            logger.warning(t'Plugin {plugin_name} has no __plugin_info__ attribute, skipping')
+            continue
+
+        valid_plugins[plugin_name] = plugin_module
+
+    return valid_plugins

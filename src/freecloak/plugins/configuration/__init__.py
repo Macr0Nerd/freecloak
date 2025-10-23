@@ -17,13 +17,13 @@
 
 
 from freecloak import __version__
-from freecloak.plugins.abstract import PluginInfo
+from freecloak.plugins.plugins import PluginInfo
 
+
+__all__ = []
 
 __plugin_info__ = PluginInfo(
     plugin_name='configuration',
     plugin_description='keycloak configuration plugin',
     plugin_version=__version__
 )
-
-__all__ = []

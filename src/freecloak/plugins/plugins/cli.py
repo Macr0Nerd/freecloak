@@ -16,16 +16,14 @@
 ##############################################################################
 
 
-from freecloak import __version__
-from freecloak.plugins.abstract.plugin_info import PluginInfo
+import argparse
+import logging
+
+from freecloak.plugins.logging import TemplateStringAdapter
 
 
-__all__ = [
-    "PluginInfo",
-]
+logger = TemplateStringAdapter(logging.getLogger(__name__))
 
-__plugin_info__ = PluginInfo(
-    plugin_name="abstract",
-    plugin_description="abstract object types and dataclasses",
-    plugin_version=__version__,
-)
+
+def add_plugin_parser(subparsers: argparse._SubParsersAction) -> None:
+    list_parser = subparsers.add_parser('list', description='plugins manager')

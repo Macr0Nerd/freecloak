@@ -16,34 +16,27 @@
 ##############################################################################
 
 
-import importlib
 import logging
-import pkgutil
-from types import ModuleType
 
-import freecloak.plugins
 from freecloak.plugins.logging import TemplateStringAdapter
+from freecloak.plugins.plugins import PluginInfo
+from freecloak.plugins.plugins.loader import discover_plugins
 
 
 logger = TemplateStringAdapter(logging.getLogger(__name__))
 
 
-def discover_plugins() -> dict[str, ModuleType]:
-    iter_namespace = lambda ns_pkg: pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + ".")
+def list(**_) -> int:
+    discovered_plugins = discover_plugins()
 
-    discovered_plugins = {
-        name: importlib.import_module(name)
-        for finder, name, ispkg
-        in iter_namespace(freecloak.plugins)
-    }
+    print(f'{'Name':<15} {'Version':<15} {'Description'}')
+    print(f'{'=' * 15} {'=' * 15} {'=' * 15}')
 
-    valid_plugins = {}
+    for plugin_path, plugin_module in discovered_plugins.items():
+        plugin_info: PluginInfo = plugin_module.__plugin_info__
+        name = plugin_info.plugin_name
+        version = plugin_info.plugin_version
+        description = plugin_info.plugin_description
+        print(f'{name:<15} {version if version else '':<15} {description if description else ''}')
 
-    for plugin_name, plugin_module in discovered_plugins.items():
-        if not hasattr(plugin_module, '__plugin_info__'):
-            logger.warning(f'Plugin {plugin_name} has no __plugin_info__ attribute, skipping')
-            continue
-
-        valid_plugins[plugin_name] = plugin_module
-
-    return valid_plugins
+    return 0

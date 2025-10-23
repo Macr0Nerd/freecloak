@@ -17,7 +17,8 @@
 
 
 from freecloak import __version__
-from freecloak.plugins.abstract.plugin_info import PluginInfo
+from freecloak.plugins.plugins import PluginInfo
+
 from freecloak.plugins.logging.abstract import TemplateStringAdapter
 from freecloak.plugins.logging.utils import configure_logging
 
@@ -29,7 +30,7 @@ __all__ = [
 
 __plugin_info__ = PluginInfo(
     plugin_name="logging",
-    plugin_description="logging and output configuration",
+    plugin_description="logging and output configuration plugin",
     plugin_version=__version__,
 )
 

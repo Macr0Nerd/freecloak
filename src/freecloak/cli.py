@@ -21,9 +21,9 @@ import importlib
 import logging
 
 from freecloak import __version__
-from freecloak.plugins.abstract import PluginInfo
 from freecloak.plugins.logging import configure_logging, TemplateStringAdapter
-from freecloak.plugins.utils import discover_plugins
+from freecloak.plugins.plugins import PluginInfo
+from freecloak.plugins.plugins.loader import discover_plugins
 
 
 logger = TemplateStringAdapter(logging.getLogger(__name__))
@@ -65,11 +65,11 @@ def main() -> int:
     discovered_plugins = discover_plugins()
 
     subparsers = root_parser.add_subparsers(help='plugin help', dest='plugin', metavar='PLUGIN', required=True)
-    for plugin_name, plugin_module in discovered_plugins.copy().items():
+    for plugin_path, plugin_module in discovered_plugins.copy().items():
         plugin_info: PluginInfo = plugin_module.__plugin_info__
 
         try:
-            plugin_cli_module = importlib.import_module(f'{plugin_name}.cli')
+            plugin_cli_module = importlib.import_module(f'{plugin_path}.cli')
             plugin_parser_func = plugin_cli_module.add_plugin_parser
 
             plugin_parser_kwargs = {}

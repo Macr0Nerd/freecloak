@@ -17,14 +17,15 @@
 
 
 from freecloak import __version__
-from freecloak.plugins.abstract import PluginInfo
-from freecloak.plugins.utils.plugins import discover_plugins
+from freecloak.plugins.plugins.abstract import PluginInfo
 
 
-__all__ = ['discover_plugins']
+__all__ = [
+    "PluginInfo",
+]
 
 __plugin_info__ = PluginInfo(
-    plugin_name="utils",
-    plugin_description="freecloak utilities",
+    plugin_name="plugins",
+    plugin_description="plugin management plugin",
     plugin_version=__version__,
 )
