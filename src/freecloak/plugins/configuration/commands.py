@@ -21,7 +21,7 @@ import logging
 from freecloak.plugins.exceptions import FreecloakExitError
 from freecloak.plugins.logging import TemplateStringAdapter
 
-from freecloak.plugins.keycloak.utils import get_session
+from freecloak.plugins.keycloak import KeycloakClient
 
 
 logger = TemplateStringAdapter(logging.getLogger(__name__))
@@ -32,7 +32,9 @@ def dev(
     **kwargs
 ) -> int:
     try:
-        with get_session(realm, **kwargs) as s:
+        with KeycloakClient(realm=realm, **kwargs) as client:
+            realms = client.get_realms(brief_representation=True)
+
             pass
     except FreecloakExitError:
         return 1
